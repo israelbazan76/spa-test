@@ -325,7 +325,7 @@ var drop_handler = function (e) {
     setDragAndDropHandlers(dropElem);
     storeItems();
   }
-  this.classList.remove('over');
+  
   return false;
 }
 
