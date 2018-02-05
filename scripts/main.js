@@ -298,13 +298,15 @@ var dragstart_handler = function(e) {
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/html', this.outerHTML);
 
+  this.classList.add('dragStartClass');
 }
 var dragover_handler = function(e) {
   if (e.preventDefault) {
     e.preventDefault(); // Necessary. Allows us to drop.
   }
-
-  e.dataTransfer.dropEffect = 'move';  // See the section on the DataTransfer object.
+  this.classList.add('over');
+  e.dataTransfer.dropEffect = 'move';  
+	
 
   return false;
 }
@@ -325,8 +327,20 @@ var drop_handler = function (e) {
     setDragAndDropHandlers(dropElem);
     storeItems();
   }
-  
+  dragSrcEl.classList.remove("dragStartClass");
   return false;
+}
+
+var dragenter_handler = function(e) {
+	dragSrcEl.classList.add("over");
+}
+var dragleave_handler = function(e) {
+	dragSrcEl.classList.remove("over");
+}
+var dragend_handler = function(e) {
+	var items = document.querySelectorAll("#items li");
+	items.forEach(function (item) { item.classList.remove("over"); });
+	dragSrcEl.classList.remove("dragStartClass");
 }
 
 
@@ -334,6 +348,10 @@ function setDragAndDropHandlers(element) {
 	element.addEventListener("dragstart",dragstart_handler,false);
 	element.addEventListener("dragover",dragover_handler,false);
 	element.addEventListener("drop",drop_handler,false);
+	
+	element.addEventListener('dragenter', dragenter_handler, false)
+	  element.addEventListener('dragleave', dragleave_handler, false)
+	  element.addEventListener('dragend', dragend_handler, false)
 }
 
 // drag and drop end
