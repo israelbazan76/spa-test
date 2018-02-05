@@ -8,6 +8,7 @@ var list = document.getElementById( "list" ); /* main list \*/
 var listForStorage=new Array(); /* list of items to be stored*/
 
 
+
 /**
  * Validations functions
  * 
@@ -123,7 +124,7 @@ function updateNitems(add=true){
  * Deletes item from the List
  */
 function deleteItem(btn) {
-	var item = btn.parentNode.parentNode.parentNode;
+	var item = btn.closest("li");
 	
 	
 	swal({
@@ -156,16 +157,22 @@ function deleteItem(btn) {
  * Open the Item edition form 
  */
 function editItem(btn) {
-	var div = btn.parentNode.parentNode;
+		
+	var div = btn.closest(".card");
+	var item = div.closest("li");
+	
 	div.style.display="none";
 	
+	
 	var desc = div.getElementsByTagName("label")[0];
-	var form_edit = div.parentNode.getElementsByTagName("form")[0];
+	
+	var form_edit = item.getElementsByTagName("form")[0];
 	
 	form_edit.elements["newDescription"].value = desc.innerText; 
 	form_edit.getElementsByTagName("img")[0].src = div.getElementsByTagName("img")[0].src; 
 	
-	form_edit.setAttribute("style","display:block");
+	form_edit.style.display="block";
+	
 	  
 };
 /*
@@ -207,16 +214,19 @@ function createEditForm(){
 	divBtns.setAttribute("class","small button-group");
 	
 	///*
-	var btnCancel = document.createElement("BUTTON");
+	var btnCancel = document.createElement("A");
 	btnCancel.appendChild(document.createTextNode("Cancel")); 
 	btnCancel.setAttribute("onclick","cancelEditItem(this)");
 	btnCancel.setAttribute("class","button secondary")
 	//*/
 	
-	var btnSave = document.createElement("INPUT");
-	btnSave.setAttribute("type", "submit");
-	btnSave.setAttribute("value", "Save");
+	var btnSave = document.createElement("A");
+	btnSave.appendChild(document.createTextNode("Save")); 
+	
+	//btnSave.setAttribute("type", "submit");
+	//btnSave.setAttribute("value", "Save");
 	btnSave.setAttribute("class","button")
+	btnSave.setAttribute("onclick","saveItem(this)");
 	
 	form_edit.appendChild(newImage);
 	form_edit.appendChild(newDescription);
@@ -236,19 +246,23 @@ function createEditForm(){
  * Cancels the Edit operation / Close the item edit form 
  */
 function cancelEditItem(btn){
-	var form = btn.parentNode.parentNode;
-	var div = form.parentNode.getElementsByTagName("div")[0];
+	
+	var form = btn.closest("form");
+	var div = form.closest("li").getElementsByClassName("card")[0];
 	div.style.display="block";
 	form.style.display="none";
-	event.preventDefault();
+	
+	return false;
 }
 
 /*
  * Saves the changes made to the item
  */
-function saveItem(form) {
+function saveItem(btn) {
+
+	var form = btn.closest("form");
 	
-	var div = form.parentNode.getElementsByTagName("div")[0];
+	var div = form.closest("li").getElementsByClassName("card")[0];
 	var description = div.getElementsByTagName("label")[0];
 	var image = div.getElementsByTagName("img")[0];
 	
@@ -263,10 +277,7 @@ function saveItem(form) {
 			
 			storeItems();	
 	}
-   
-	
-    event.preventDefault();
-    
+    return false;
 };
 
 
@@ -430,24 +441,26 @@ function addItem(description,imageSrc,toStore=true)
 
 function loadStoredList()
 {
-	if (typeof(Storage) !== "undefined") {
-	    // Store
-	    
-	    // Retrieve
-	    if(localStorage.getItem("listForStorage") !== null){
-	    	
-	    	listForStorage = JSON.parse(localStorage.getItem("listForStorage"));
-	    	for (data of listForStorage) {
-	    		addDataToList(data);
-	    	}
-	    }
-	    
-	}
-	else {
-	    //document.getElementById("result").innerHTML = "Sorry, your browser does not support Web Storage...";
-	    swal("Invalid browser!", "your browser does not support Web Storage", "error");
-	}
-		
+	
+    	if (typeof(Storage) !== "undefined") {
+    	    // Store
+    	    
+    	    // Retrieve
+    	    if(localStorage.getItem("listForStorage") !== null){
+    	    	
+    	    	listForStorage = JSON.parse(localStorage.getItem("listForStorage"));
+    	    	for (data of listForStorage) {
+    	    		addDataToList(data);
+    	    	}
+    	    }
+    	    
+    	}
+    	else {
+    	    //document.getElementById("result").innerHTML = "Sorry, your browser does not support Web Storage...";
+    	    swal("Invalid browser!", "your browser does not support Web Storage", "error");
+    	}	
+    
+    	
 }
 function addDataToList(data=null){
    var description, imageSrc, toStore;
@@ -476,13 +489,12 @@ function addDataToList(data=null){
 	   document.getElementById("description").value = "";
 	   document.getElementById("output_image").src = "http://placehold.it/320x320";
 	   
-	   //message success
+	   // success message
 	   
 	   swal("Task Done!", "The item was added to the list!", "success");
    }
    addItem(description,imageSrc,toStore);
 }
- 
 window.onload = function() {
 	 loadStoredList();
 	 document.getElementById( "btnAdd" ).focus();
