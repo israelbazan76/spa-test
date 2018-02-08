@@ -299,59 +299,33 @@ function storeItems(){
 }
 
 /*************************
- * Drag & Drop functions
+ * Drag & Drop handlers
  ************************/
-var dragSrcEl = null;
 
-var dragstart_handler = function(e) {
-  dragSrcEl = this;
-
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/html', this.outerHTML);
-
-  this.classList.add('dragStartClass');
+var dragstart_handler = function(event) {
+	var itemDragged = event.target.closest("li");
+	event.dataTransfer.setData('target_id',itemDragged.id);
+    var drag_target_id = event.dataTransfer.getData('target_id');
 }
-var dragover_handler = function(e) {
-  if (e.preventDefault) {
-    e.preventDefault(); // Necessary. Allows us to drop.
-  }
-  this.classList.add('over');
-  e.dataTransfer.dropEffect = 'move';  
+var dragover_handler = function(event) {
+    event.preventDefault(); // Necessary. Allows us to drop.
+}
+
+
+
+var drop_handler = function (event) {
+
 	
-
-  return false;
-}
-
-
-
-var drop_handler = function (e) {
-
-  if (e.stopPropagation) {
-    e.stopPropagation(); // Stops some browsers from redirecting.
-  }
-
-  if (dragSrcEl != this) {
-    this.parentNode.removeChild(dragSrcEl);
-    var dropHTML = e.dataTransfer.getData('text/html');
-    this.insertAdjacentHTML('beforebegin',dropHTML);
-    var dropElem = this.previousSibling;
-    setDragAndDropHandlers(dropElem);
-    storeItems();
-  }
-  dragSrcEl.classList.remove("dragStartClass");
-  return false;
-}
-
-var dragenter_handler = function(e) {
-	dragSrcEl.classList.add("over");
-}
-var dragleave_handler = function(e) {
-	dragSrcEl.classList.remove("over");
-}
-var dragend_handler = function(e) {
-	var items = document.querySelectorAll("#items li");
-	items.forEach(function (item) { item.classList.remove("over"); });
-	dragSrcEl.classList.remove("dragStartClass");
+	event.preventDefault();  
+	var drop_target = event.target.closest("li");//item donde se esta por dejar el item arrastrado
+	  var drag_target_id = event.dataTransfer.getData('target_id');
+	  var drag_target = document.getElementById(drag_target_id);//item arrastrado
+	  var tmp = document.createElement('li');
+	  drop_target.before(tmp);
+	  drag_target.before(drop_target);
+	  tmp.replaceWith(drag_target);
+	  
+	  storeItems();
 }
 
 
@@ -360,21 +334,20 @@ function setDragAndDropHandlers(element) {
 	element.addEventListener("dragover",dragover_handler,false);
 	element.addEventListener("drop",drop_handler,false);
 	
-	element.addEventListener('dragenter', dragenter_handler, false)
-	  element.addEventListener('dragleave', dragleave_handler, false)
-	  element.addEventListener('dragend', dragend_handler, false)
 }
 
 // drag and drop end
 
 function addItem(description,imageSrc,toStore=true)
 {
+	lastId++;
 	// Crear nodo de tipo Element
 	var item = document.createElement("li");
 	var div = document.createElement("div");
 	
 	div.setAttribute("class","card")
 	
+	item.setAttribute("id","item-"+lastId);
 	
 	item.appendChild(div);
 	item.setAttribute("draggable","true");
@@ -434,7 +407,7 @@ function addItem(description,imageSrc,toStore=true)
 	if(toStore){
 		storeItems();	
 	}
-	lastId++;
+	
 	updateNitems();
 	
 }
